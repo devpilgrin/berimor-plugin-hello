@@ -32,7 +32,7 @@ jobs:
           COSIGN_YES: "true"
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          cosign sign-blob --yes \
+          cosign sign-blob --yes --new-bundle-format \
             --bundle "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz.sigstore.json" \
             "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz"
 
