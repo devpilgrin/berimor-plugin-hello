@@ -19,8 +19,8 @@ jobs:
       - name: Pack
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          tar -czf "hello-tool-v${VERSION}-linux-x64.tar.gz" hello-tool manifest.yaml
-          sha256sum "hello-tool-v${VERSION}-linux-x64.tar.gz" > "hello-tool-v${VERSION}-linux-x64.tar.gz.sha256"
+          tar -czf "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz" hello-tool manifest.yaml
+          sha256sum "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz" > "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz.sha256"
 
       # Подпись sigstore (keyless — OIDC этого workflow и есть
       # идентичность подписанта, которую пинит trust-список berimor).
@@ -33,14 +33,14 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           cosign sign-blob --yes \
-            --bundle "hello-tool-v${VERSION}-linux-x64.tar.gz.sigstore.json" \
-            "hello-tool-v${VERSION}-linux-x64.tar.gz"
+            --bundle "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz.sigstore.json" \
+            "berimor-plugin-hello-${VERSION}-linux-x64.tar.gz"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            hello-tool-v*-linux-x64.tar.gz
-            hello-tool-v*-linux-x64.tar.gz.sha256
-            hello-tool-v*-linux-x64.tar.gz.sigstore.json
+            berimor-plugin-hello-*-linux-x64.tar.gz
+            berimor-plugin-hello-*-linux-x64.tar.gz.sha256
+            berimor-plugin-hello-*-linux-x64.tar.gz.sigstore.json
           generate_release_notes: true
