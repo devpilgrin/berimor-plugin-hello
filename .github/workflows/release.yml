@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  id-token: write # OIDC для keyless-подписи sigstore
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Архив: бинарник + манифест — ОДНИМ артефактом в КОРНЕ архива
+      # (контракт berimor plugin install), одна подпись.
+      - name: Pack
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          tar -czf "hello-tool-v${VERSION}-linux-x64.tar.gz" hello-tool manifest.yaml
+          sha256sum "hello-tool-v${VERSION}-linux-x64.tar.gz" > "hello-tool-v${VERSION}-linux-x64.tar.gz.sha256"
+
+      # Подпись sigstore (keyless — OIDC этого workflow и есть
+      # идентичность подписанта, которую пинит trust-список berimor).
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign archive
+        env:
+          COSIGN_YES: "true"
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cosign sign-blob --yes \
+            --bundle "hello-tool-v${VERSION}-linux-x64.tar.gz.sigstore.json" \
+            "hello-tool-v${VERSION}-linux-x64.tar.gz"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            hello-tool-v*-linux-x64.tar.gz
+            hello-tool-v*-linux-x64.tar.gz.sha256
+            hello-tool-v*-linux-x64.tar.gz.sigstore.json
+          generate_release_notes: true

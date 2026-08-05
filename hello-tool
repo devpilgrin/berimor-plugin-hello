@@ -1,0 +1,15 @@
+#!/bin/sh
+# Эталонный плагин berimor (контракт berimor-plugins):
+# argv[1] — имя инструмента; stdin — JSON-аргументы; stdout — JSON-ответ.
+tool="$1"
+read -r args
+case "$tool" in
+  hello.greet)
+    name=$(printf '%s' "$args" | sed -n 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    [ -z "$name" ] && name="сэр"
+    printf '{"content": "Привет, %s — от hello-tool v0.1.0"}\n' "$name"
+    ;;
+  *)
+    printf '{"error": "неизвестный инструмент: %s"}\n' "$tool"
+    ;;
+esac
